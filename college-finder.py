@@ -63,27 +63,67 @@ def find_colleges(user_data: dict) -> dict:
     return json.loads(response.text)
 
 
-student_input = {
-    "subject_gpas": {
-        "Math": 3.9,
-        "Science": 3.8,
-        "English": 3.2,
-        "History/Social Studies": 3.4,
-    },
-    "major": "Computer Science",
-    "minor": "None",
-    "family_income": 65000,
-    "priorities": [
-        "Low Tuition Cost & Generous Financial Aid",
-        "High Major/Department Ranking",
-        "Urban / City Campus Location",
-        "Undergraduate Research Opportunities",
-        "Vibrant Campus Life & Sports Culture",
-    ],
-    "extracurriculars": "Robotics Team Lead (2 years), High School Swim Team, 80 Hours Volunteering at Local Library",
-}
+def collect_student_input() -> dict:
+    print("=== COLLEGE FINDER AI: STUDENT PROFILE SETUP ===\n")
+
+    print("--- 1. SUBJECT GPAs (0.0 - 4.0) ---")
+    subjects = ["Math", "Science", "English", "History/Social Studies"]
+    subject_gpas = {}
+    for sub in subjects:
+        while True:
+            try:
+                gpa_val = float(input(f"Enter {sub} GPA: "))
+                if 0.0 <= gpa_val <= 4.0:
+                    subject_gpas[sub] = gpa_val
+                    break
+                else:
+                    print("Please enter a value between 0.0 and 4.0.")
+            except ValueError:
+                print("Invalid input. Please enter a valid number (e.g. 3.8).")
+
+    print("\n--- 2. ACADEMIC INTERESTS ---")
+    major = input("Enter Intended Major: ").strip()
+    minor = input("Enter Intended Minor (Press Enter to skip/None): ").strip()
+    if not minor:
+        minor = "None"
+
+    print("\n--- 3. FINANCIAL INFORMATION ---")
+    while True:
+        try:
+            income_input = input("Enter Estimated Annual Family Income ($): ").replace(",", "").strip()
+            family_income = float(income_input)
+            break
+        except ValueError:
+            print("Invalid input. Please enter a number (e.g. 65000).")
+
+    print("\n--- 4. RANK YOUR TOP 5 PRIORITIES ---")
+    print("Examples: Low Tuition, High Major Ranking, Urban Location, Research Opportunities, Sports")
+    priorities = []
+    for i in range(1, 6):
+        p = input(f"Rank #{i} Priority: ").strip()
+        if not p:
+            p = f"Priority {i}"
+        priorities.append(p)
+
+    print("\n--- 5. EXTRACURRICULAR ACTIVITIES ---")
+    extracurriculars = input("Enter Extracurriculars/Clubs/Volunteering (Press Enter for N/A): ").strip()
+    if not extracurriculars:
+        extracurriculars = "N/A"
+
+    return {
+        "subject_gpas": subject_gpas,
+        "major": major,
+        "minor": minor,
+        "family_income": family_income,
+        "priorities": priorities,
+        "extracurriculars": extracurriculars,
+    }
+
 
 if __name__ == "__main__":
+    student_input = collect_student_input()
+
+    print("\nConnecting to Gemini AI and analyzing profile...")
     results = find_colleges(student_input)
 
     print(f"\n--- PROFILE SUMMARY ---\n{results['match_summary']}\n")
